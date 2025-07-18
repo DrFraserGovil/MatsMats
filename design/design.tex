@@ -1,0 +1,100 @@
+\documentclass[a4paper,9pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{lscape}
+\usepackage{pgfplots}
+\usepackage{hyperref}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{7pt}
+
+\hypersetup{
+    colorlinks,
+    linkcolor={black},
+    citecolor={blue!50!black},
+    urlcolor={blue!90!black},
+	filecolor={blue!90!black}
+}
+
+\title{MATSMATS: Matrix-Sequence Matching \& Scoring}
+\author{Jack Fraser-Govil}
+
+\begin{document}
+	\maketitle
+
+	\section{Background}
+
+		The goal of the project is to improve a deterministic/theoretical model by comparing its output to the better-performing models submitted to the \href{{https://ibis.autosome.org/home}}{IBIS Challenge}. Though these models outperformed the theoretical model on some counts, many of them are `Black Boxes' which do not necessarily provide biological insights; despite performing better on benchmarks. 
+
+
+		
+	\section{Problem Statement}
+
+		% One of the limiting factors in the AAA
+		The theoretical model performed notably better in the PWM-prediction portion of the competition than in the AAA portion; despite the score (nominally) being simply computable from the PWM and the sequences. Ilya suspects this is due to a computational limit encountered. 
+
+		If $\{S_0,...,S_{N-1}\}$ are the $N$ sequences in the training data, and $\{W_0,...,W_M\}$ the $M$ predicted PWM matrices, then to extract the AAA score nominally requires:
+		\begin{itemize}
+			\item Iterating over all sequences
+			\item For each sequence, iterate over all matrices
+			\item For each sequence-matrix pair, compute the maximally-scoring subregion ($\pm$ a normalisation)
+		\end{itemize}
+		If we assume that each sequence is of length $\ell_s$ and each PWM encodes $\ell_m$ bases, then this requires computing $\approx N \times M \times (\ell_s - \ell_m)$ scores, each of which requires $\ell_m$ individual products.
+
+		The code Ilya is using writes every score above a certain threshold to disk - if the threshold is set too high, then no score is output. If the score is set too low, then every score is written to disk.
+
+		A cursory look at the data tells me that $N\sim 10^4$, $M \sim 10^2$ and $\ell_s\sim10^2$ and $\ell_m \sim 10$. If recording each score requires $\sim 6$ characters, then this translates to $\approx 20$GB per assay-type. The bottleneck is writing all of this to disk. Ilya therefore resorted to not iterating over every matrix, and randomly sampling in the hope of stochastically capturing the best one.
+
+		However, for the problem at hand - writing every single score to disk is highly undesirable. Ilya wants the single, maximal score output: one score per sequence (and the matrix to which it best-matched). 
+
+
+
+
+	\section{Solution}
+
+		As with most computationally-bottlenecked code, I think the solution is to switch to using C++, and try to do as much in-memory as possible. 
+
+		I'm calling this \textbf{Mat}rix-\textbf{S}equence \textbf{Mat}ching \& \textbf{S}corer (MATSMATS), because I like giving things silly but pronounceable names. 
+
+		The total size of the input data is $N\ell_s + 4W\ell_m$ which should trivially fit in memory (or which can trivially have data piped in).
+
+		As part of the RAMICES III \& GenCHORD code I already have:
+		\begin{enumerate}
+			\item A highly efficient and thread-safe input parsing code
+			\item A well documented argument handler
+			\item A parallel job scheduler 
+			\item An efficient matrix scanning algorithm
+		\end{enumerate}
+
+		This problem should be almost trivially solved by simply stapling those elements together. 
+
+		The only point of difficulty will be error-handling, ensuring consistency with prior scoring systems and ensuring that the input data is in the expected format. 
+
+		\subsection{Specification}
+
+			We will therefore write a code which:
+			\begin{enumerate}
+				\item Accepts as input:
+				\begin{enumerate}
+					\item A path to a file containing the target PWMs in a standard format
+					\item A path to a file containing the target sequences \textbf{OR} target sequences passed via an input pipe stream
+				\end{enumerate}
+				\item Outputs a single file containing for each input sequence
+				\begin{enumerate}
+					\item The sequence
+					\item The index of the best-matching matrix
+					\item The score associated with that matrix
+				\end{enumerate}
+			\end{enumerate}
+
+			This code will (probably) be able to run in parallel for additional computational gains.
+		\subsection{Additional Thoughts}
+			It would be trivial, i.e. to extend the code to include the scores of all matrices (not just the best scoring ones) for comparison. This would increase the output filesize by $\sim M$, but may be more informative. 
+
+			We could also specify a threshold below which a sequence is determined to have no matches in the input matrices -- i.e. flag them as those which have not been adequately captured by any of the PWMs.
+
+			It would also be easy (in terms of writing the code, not in terms of the computational cost) to account for short insertions and deletions in the matching process, if that's something it would be interesting to examine.  
+\end{document}
+
