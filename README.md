@@ -20,6 +20,8 @@ MATSMATS is therefore a streamlined, highly optimised code which:
 
 ### Licensing
 
-Portions of this code are inspired by the [MOODS repository](https://github.com/jhkorhonen/MOODS/tree/master), released under a GPL-3.0 license.
+Portions of this code are inspired by the [MOODS repository](https://github.com/jhkorhonen/MOODS/tree/master), released under a GPL-3.0 license. 
 
-This code is released under the same license.
+Many of the modules in ``src/tools`` are replicated wholesale from [RAMICES](https://github.com/DrFraserGovil/RAMICES_II), a code written by the same authors.
+
+This code is released under a compatible GPL-3.0 license. 
