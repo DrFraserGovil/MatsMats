@@ -17,8 +17,6 @@ class SettingsObject
 		#undef S_GROUP
 
 		
-		int UnusuedVariableForCheckingDoxygen = 5;
-
 		//!Default constructor
 		SettingsObject()
 		{
