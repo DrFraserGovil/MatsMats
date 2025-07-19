@@ -1,3 +1,15 @@
+#matsmats unique ignores
+
+#there is a file in data/test, but it is the synthetic data generator, added manually. Otherwise data should not be transported
+data/ 
+.vscode
+*.build
+matsmats
+
+
+
+### Standard C++ gitignore
+
 # Prerequisites
 *.d
 
