@@ -12,9 +12,9 @@ MotifMatrix::MotifMatrix(std::string filepath,int id) : ID(id)
 		for (int j = 0; j < 4; ++j)
 		{
 			LogOdds[i][j] = -4*(rand()*1.0/RAND_MAX -1);
-			n += exp(LogOdds[i][j]);
+			n += std::exp(LogOdds[i][j]);
 		}
-		n = log(n);
+		n = std::log(n);
 		for (int j = 0; j < 4; ++j)
 		{
 			LogOdds[i][j] -= n + log(0.25);
