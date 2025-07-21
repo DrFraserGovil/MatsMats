@@ -5,6 +5,10 @@
 #define SETTINGS_VALIDATE
 #include "SettingsConstructor.h"
 
+#define SETTINGS_CATEGORY OutputSettings
+#define SETTINGS_FILE "definitions/output.def"
+#include "SettingsConstructor.h"
+
 
 
 
@@ -13,7 +17,7 @@
 //(i.e. it won't compile, because you can't access Settings.NonExistantGroup) 
 #define SETTINGS_GROUPS \
 	S_GROUP(SystemSettings, System) \
-	
+	S_GROUP(OutputSettings, Output) \
 
 // SGroupDefinition.h
 #ifndef S_GROUP_DEFINITION_H

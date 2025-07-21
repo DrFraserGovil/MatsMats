@@ -7,26 +7,38 @@ typedef uint_fast32_t dnabits;
 
 namespace Sequence
 {
+	const int LogAlphabetSize = 2;
+	const int BitHackExtractor = 3;
 	class DNA
 	{
 		public:
 			DNA(std::string_view sequencestring);
 
 			const int Length;
-			dnabits ResetBitfield(size_t motifSize);
-			dnabits GetBitfield();
-			dnabits GetRCBitfield();
-			dnabits NextBitfield();
 			std::vector<unsigned char> Sequence; // array of 0/1/2/3 for A/C/T/G. Unsigned char is 1byte long, so nice and efficient
 
+			//bitfield manipulators
+			void SetBitfield(size_t motifSize, int startidx=0);
+			dnabits GetBitfield();
+			dnabits GetRCBitfield();
+			void StepBitfield();
+			
+
 			static int MaximumEncodedLength();
+
+			// int SubstringHead;
+			// double Score;
+			// double RCScore;
+			std::string FileString;
 		private:
 
+			
 			dnabits Bitfield;
 			size_t FieldRightIndex;
 			int CurrentMotifSize;
-			const int LogAlphabetSize = 2;
+			
 			dnabits Mask;
+
 	};
 
 

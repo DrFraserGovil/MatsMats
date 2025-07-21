@@ -1,0 +1,1 @@
+SETTING(bool, FullSummary,false,"full","If true, outputs the results of every motif per-string.")

@@ -2,6 +2,9 @@
 
 namespace Sequence
 {
+	//used for the bitfields to efficiently encode dna strings
+	
+
 	DNA::DNA(std::string_view sequencestring): Length(sequencestring.size())
 	{
 		Sequence.reserve(sequencestring.length()); // Pre-allocate memory for efficiency
@@ -19,9 +22,11 @@ namespace Sequence
 					break;
 			}
 		}
+		// Score = 0;
+		// RCScore = 0;
 	}
 
-	dnabits DNA::ResetBitfield(size_t motifSize)
+	void DNA::SetBitfield(size_t motifSize, int startIdx )
 	{
 		if (motifSize > Length)
 		{
@@ -30,15 +35,13 @@ namespace Sequence
 		}
 
 		CurrentMotifSize = motifSize;
-		FieldRightIndex = motifSize-1;
+		FieldRightIndex = startIdx + motifSize - 1;
 		Bitfield = 0;
 		for (int i = 0; i < motifSize; ++i)
 		{
-			Bitfield= (Bitfield << LogAlphabetSize) + Sequence[i];
-			LOG(DEBUG) << "Current encoding" << Decode(Bitfield,i+1);
+			Bitfield= (Bitfield << LogAlphabetSize) + Sequence[i+startIdx];
 		}
 		Mask = (static_cast<dnabits>(1) << (LogAlphabetSize * motifSize)) - 1; //mask must be of correct type, take no prisoners!
-		return Bitfield;
 	}
 	dnabits DNA::GetBitfield()
 	{
@@ -47,22 +50,23 @@ namespace Sequence
 
 	dnabits DNA::GetRCBitfield()
 	{
+		// return 0;//
 		dnabits rc = 0;
 		dnabits orig = Bitfield;
+		
 		for (int i = 0; i < CurrentMotifSize; ++i)
 		{
-			rc = (rc <<2) + (orig & 3) ^ 3; //bit hacking!
-			orig = orig >> 2;
+			rc = (rc <<LogAlphabetSize) + (orig & BitHackExtractor) ^ BitHackExtractor; //bit hacking!
+			orig = orig >> LogAlphabetSize;
 		}
 		return rc;
 	}
 
-	dnabits DNA::NextBitfield()
+	void DNA::StepBitfield()
 	{
 		//performs no checks of its own (for speed), so caller responsibility to make sure FieldRightIndex is never out of bounds 
 		++FieldRightIndex;
 		Bitfield = ((Bitfield << LogAlphabetSize) + Sequence[FieldRightIndex]) & Mask;
-		return Bitfield;
 	}
 
 
@@ -72,8 +76,8 @@ namespace Sequence
 		std::string out(length,' ');
 		for (int i = 0; i < length; ++i)
 		{
-			char base = decodermap[code &3];
-			code = code >> 2;
+			char base = decodermap[code &BitHackExtractor];
+			code = code >> LogAlphabetSize;
 			out[length-i-1] = base;
 		}
 		return out;

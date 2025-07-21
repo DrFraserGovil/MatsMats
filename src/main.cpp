@@ -5,21 +5,50 @@
 #include "tools/tools.h"
 #include "parallel/parallel.h"
 #include "biology/DNASequence.h"
-#include "biology/MotifMatrix.h"
+#include "scan/MotifSet.h"
+#include "scan/Scanner.h"
 
 int main(int argc, char**argv)
 {
+	srand(1);
+	// srand(time(NULL));
+	rand();rand(); //flush the seed
+
 	//interprets the command line arguments, and saves them into the settings object
 	Settings.Initialise(argc,argv);
 
-	std::vector<MotifMatrix> ms;
-	for (int id = 0; id < 100; ++id)
+	int Nseq = Settings.System.InputSize;
+	int SeqLength = 25;
+
+	SequenceScanner ms;
+	ms.LoadMotifs(Nseq,SeqLength);
+	ThreadRecords recs(ms.size());
+
+	
+	
+	std::vector<char> lib = {'a','c','g','t'};
+	std::string seq = std::string(SeqLength,' ');
+	
+	for (int q = 0; q < SeqLength; ++q)
 	{
-		auto motif = MotifMatrix("test",id);
-		motif.Initialise(1e7,50);
-		ms.push_back(motif);
+		int r = rand() % 4;
+		seq[q] = lib[r];
 	}
-	LOG(INFO) << ms.size();
+	// LOG(DEBUG) << seq;
+	Sequence::DNA dna(seq);
+	for (int i = 0; i < Nseq ; ++ i)
+	{
+		for (int q= 0; q < SeqLength; ++q)
+		{
+			dna.Sequence[q] = rand() % 4;
+		}
+
+		ms.Scan(dna,recs);
+	}
+	
+	
+
+
 
 	//Load PWMs from memory
 

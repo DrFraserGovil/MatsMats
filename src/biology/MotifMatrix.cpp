@@ -1,10 +1,9 @@
 #include "MotifMatrix.h"
 #include "iomanip"
-MotifMatrix::MotifMatrix(std::string filepath,int id)
+MotifMatrix::MotifMatrix(std::string filepath,int id) : ID(id)
 {
-	ID = id;
 	//placeholder random initialisation
-	int L = 12;
+	int L = 5;// + rand()%2;
 	LogOdds = std::vector<std::vector<double>>(L,std::vector<double>(4,0.0));
 
 	for (int i = 0; i < L; ++i)
@@ -21,98 +20,84 @@ MotifMatrix::MotifMatrix(std::string filepath,int id)
 			LogOdds[i][j] -= n + log(0.25);
 		}
 	}
+	MotifLength = LogOdds.size();
 }
-
-void MotifMatrix::Initialise(size_t sequenceCount, size_t meanSize)
+size_t MotifMatrix::size() const
 {
-	int MotifLength = LogOdds.size();
-
-	//Check if precomputing would actually speed things up
-	long long int PrecomputeSize = pow(4,MotifLength); // number of k-mers required for precomputing
-	int ExpectedKmerCount = sequenceCount *  std::max(1,(int)(meanSize - LogOdds.size())); 
-	bool isFaster = (ExpectedKmerCount * 1.0/PrecomputeSize > 1);
-
-	//Check if precomputing possible within encoding limitations
-	bool smallEnoughForEncoding = (Sequence::MaximumEncodingLength() >= MotifLength);
-
-	//Check if memory footprint would be ludicrous
-	//footprint factor estimates global memory from this single factor, chosen by user (default = 100)
-	double expectedGlobalFootprint = (PrecomputeSize * sizeof(double)) *1.0/ pow(1024,3) * Settings.System.FootprintFactor;
-	bool fitsInMemory = (expectedGlobalFootprint <= Settings.System.MemoryLimit);
-	
-	PrecomputeMode = (isFaster) && (smallEnoughForEncoding) && (fitsInMemory);
-
-
-	if (Settings.System.Verbosity >= LogLevel::DEBUG)
-	{
-		//output a nicely formatted table reasoning why precomputation was initialised (or not)
-		std::stringstream buffer;
-		buffer << "Initialising Motif " << ID;
-		buffer << "\n   Length:   " << std::setw(6) << MotifLength;
-		buffer << "\tPC-Kmers: " << std::setw(12)<< PrecomputeSize;
-		buffer << "\tEst-Kmers: " << std::setw(10) << ExpectedKmerCount;
-		buffer << "\tFootprint: " << std::setw(10) << expectedGlobalFootprint << "GiB";
-		buffer << "\n   Speedgain:" << std::setw(6) << MakeString(isFaster);
-		buffer << "\tEncoder valid:" << std::setw(8) << MakeString(smallEnoughForEncoding);
-		buffer << "\tIn memory: " << std::setw(10) << MakeString(fitsInMemory);
-		buffer << "\n   ";
-		if (PrecomputeMode)
-		{
-			buffer << "PRECOMPUTE";
-		}
-		else
-		{
-			buffer << "ON-THE-FLY";
-		}
-		LOG(DEBUG) << buffer.str();
-	}
-
-	if (PrecomputeMode)
-	{
-		PrecomputeScores();
-	}
+	return MotifLength;
 }
 
-void MotifMatrix::PrecomputeScores()
-{
-	int L = LogOdds.size();
-	dnabits nCodes = pow(4,L);
-	PrecomputedScores.resize(nCodes);
-	double bs = -99999;
-	std::string bestSeq;
-	for (dnabits code = 0; code < nCodes; ++code)
-	{
-		double score = 0;
-		dnabits decoder = code;
-		for (int i = 0; i < L; ++i)
-		{
-			int base = decoder & 3;
-			decoder = decoder >> 2;
-			score += LogOdds[L-i-1][base];
-		}
 
-		PrecomputedScores[code] = score;
-		if (score > bs)
-		{
-			bs = score;
-			bestSeq = Sequence::Decode(code,L);
-		}
-	}
-	LOG(DEBUG) << "Precomputation completed. Best matching motif is " << bestSeq;
-}
 
-double MotifMatrix::BestScore(Sequence::DNA & input)
-{
-	// if (PrecomputeMode)
-	// {
-	// 	input.ResetBitfield();
-	// }
-	// return 0;
-	//iterate over all subsequences 
-}
-
-// double MotifMatrix::Score()
+// void MotifMatrix::PrecomputeScores()
 // {
-// 	double score = 0;
+// 	int L = MotifLength;
+// 	dnabits nCodes = pow(4,L);
+// 	PrecomputedScores.resize(nCodes);
+// 	double bs = -99999;
+// 	std::string bestSeq;
+// 	for (dnabits code = 0; code < nCodes; ++code)
+// 	{
+// 		double score = 0;
+// 		dnabits decoder = code;
+// 		for (int i = 0; i < L; ++i)
+// 		{
+// 			int base = decoder & 3;
+// 			decoder = decoder >> 2;
+// 			score += LogOdds[L-i-1][base];
+// 		}
 
+// 		PrecomputedScores[code] = score;
+// 		if (score > bs)
+// 		{
+// 			bs = score;
+// 			bestSeq = Sequence::Decode(code,L);
+// 		}
+// 	}
 // }
+
+
+const std::vector<int> rcMap = {3,2,1,0}; //indexed so that rcMap[base] = rc_base
+std::pair<double,double> MotifMatrix::Score(Sequence::DNA & sequence, int idx) const
+{
+	double forwardScore = 0;
+	double rcScore = 0;
+	const int L = MotifLength;
+	for (int i = 0; i < L; ++i)
+	{
+		int base = sequence.Sequence[idx+i];
+		forwardScore += LogOdds[i][base];
+		rcScore += LogOdds[L-i-1][rcMap[base]];
+	}
+	forwardScore *= 100;
+	rcScore *=100;
+	// sequence.Score = forwardScore;
+	// sequence.RCScore = rcScore;	
+	return {forwardScore,rcScore};
+}
+
+std::string MotifMatrix::ToString() const
+{
+	std::stringstream s;
+	for (int i =0; i < 4; ++i)
+	{
+		for (int j = 0; j < MotifLength; ++j)
+		{
+			s << LogOdds[j][i];
+			if (j < MotifLength -1)
+			{
+				s << " ";
+			}
+		}
+		if (i < 3)
+		{
+			s << "\n";
+		}
+	}
+	return s.str();
+}
+
+const std::vector<std::vector<double>> & MotifMatrix::ReferenceScores() const
+{
+	return LogOdds;
+}
