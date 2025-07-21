@@ -27,10 +27,10 @@
 */
 
 #ifndef SETTINGS_FILE
-	#error "Must define a settings file before constructing X-Macro file
+	#error "Must define a settings file before constructing X-Macro file"
 #endif
 #ifndef SETTINGS_CATEGORY
-	#error "Must define a settings category
+	#error "Must define a settings category"
 #endif
 
 //allows conversion of the macro into a string with a layer of indirection

@@ -20,7 +20,7 @@ namespace Setting
 	bool inline ElementIsValue(char * nextElement)
 	{
 		bool hasDash = (nextElement[0] == '-'); //dashes signify commands, but also negative nos.
-		bool isSingleCharacter = (strlen(nextElement) == 1);
+		bool isSingleCharacter = (std::strlen(nextElement) == 1);
 
 		if (!hasDash || isSingleCharacter)
 		{

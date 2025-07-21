@@ -43,7 +43,7 @@ struct HelpMessages
 
 		std::cout << Name << ":\n\n";
 
-		sort(Messages.begin(), Messages.end(),
+		std::sort(Messages.begin(), Messages.end(),
          [](const std::tuple<std::string,std::string,std::string,std::string>& a,
             const std::tuple<std::string,std::string,std::string,std::string>& b) {
              return std::get<0>(a) < std::get<0>(b);
