@@ -6,7 +6,7 @@
 #include <cctype>
 #include "../tools/MakeString.h"
 #include <unordered_map> 
-
+#include <cstring>
 
 
 namespace Setting

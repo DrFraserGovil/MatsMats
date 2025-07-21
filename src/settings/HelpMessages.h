@@ -5,6 +5,7 @@
 #include <iostream>
 #include "../tools/MakeString.h"
 #include "../tools/stringsplit.h"
+#include <algorithm>
 struct HelpMessages
 {
 	std::string Name;

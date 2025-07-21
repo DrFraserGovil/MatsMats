@@ -13,7 +13,7 @@ void checkScore(Record & runningBest, double score, int pos, Direction direction
 	{
 		runningBest.Score = score;
 		runningBest.Position = pos;
-		runningBest.Direction = direction;
+		runningBest.Strand = direction;
 		runningBest.Hits = 1;
 	}
 	else if (abs((score - runningBest.Score)) < 1e-8)

@@ -28,7 +28,7 @@ struct Record
 {
 	double Score;
 	int Position;
-	Direction Direction;
+	Direction Strand;
 	int Hits;
 };
 

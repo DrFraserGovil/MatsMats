@@ -13,7 +13,7 @@ void ThreadRecords::CheckRecords(int motifID, double score, int pos, Direction d
 	{
 		runningBest.Score = score;
 		runningBest.Position = pos;
-		runningBest.Direction = dir;
+		runningBest.Strand = dir;
 		runningBest.Hits = 1;
 	}
 	else if (abs((score - runningBest.Score)) < 1e-8)
