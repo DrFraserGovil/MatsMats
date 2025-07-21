@@ -1,5 +1,7 @@
 #include "MotifMatrix.h"
-#include "iomanip"
+#include <iomanip>
+#include <cmath>
+
 MotifMatrix::MotifMatrix(std::string filepath,int id) : ID(id)
 {
 	//placeholder random initialisation
