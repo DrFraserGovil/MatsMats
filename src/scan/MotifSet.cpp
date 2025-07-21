@@ -1,4 +1,6 @@
 #include "MotifSet.h"
+#include <iomanip>
+#include <cmath>
 
 void SequenceScanner::LoadMotifs(int sequenceCount, int sequenceLength)
 {
@@ -71,7 +73,7 @@ void SequenceScanner::Precompute()
 		
 		//all motifs in this section have the same motif length
 		int L = Motifs[Precomputers[i][0]].size();
-		dnabits nCodes = pow(4,L);
+		dnabits nCodes = std::pow(4,L);
 		
 		PrecomputedScores[i] = std::vector<std::vector<scoreholder>>(nCodes,std::vector<scoreholder>(Precomputers[i].size(),0));
 
