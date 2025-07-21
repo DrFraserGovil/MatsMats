@@ -17,7 +17,7 @@ MotifMatrix::MotifMatrix(std::string filepath,int id) : ID(id)
 		n = std::log(n);
 		for (int j = 0; j < 4; ++j)
 		{
-			LogOdds[i][j] -= n + log(0.25);
+			LogOdds[i][j] -= n + std::log(0.25);
 		}
 	}
 	MotifLength = LogOdds.size();
