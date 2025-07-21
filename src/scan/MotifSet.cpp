@@ -1,7 +1,7 @@
 #include "MotifSet.h"
 #include <iomanip>
 #include <cmath>
-#include <format>
+// #include <format>
 
 void SequenceScanner::LoadMotifs(int sequenceCount, int sequenceLength)
 {
@@ -80,7 +80,7 @@ void SequenceScanner::Precompute()
 
 		for (int j = 0; j < Precomputers[i].size(); ++j)
 		{
-			LOG(INFO) << std::format("Precomputing [{:16}] Motif {} ({}/{})",std::string((int)(completed*marksPerSeq),'#'),Precomputers[i][j],completed,nPrecompute);
+			// LOG(INFO) << std::format("Precomputing [{:16}] Motif {} ({}/{})",std::string((int)(completed*marksPerSeq),'#'),Precomputers[i][j],completed,nPrecompute);
 
 			auto scores = Motifs[Precomputers[i][j]].ReferenceScores();//const reference to the internal log-odds of the relevant motif
 			
@@ -104,10 +104,10 @@ void SequenceScanner::Precompute()
 				//  = std::pair<double,double>(fscore,rcscore); //less efficient initialisation because it has to jump around, but hopefully more efficient extraction during runtime!
 			}
 			++completed;
-			if (completed <= nPrecompute)
-			{
-				LOG(INFO).ErasePrevious();
-			}
+			// if (completed <= nPrecompute)
+			// {
+			// 	LOG(INFO).ErasePrevious();
+			// }
 		}
 	}
 }
