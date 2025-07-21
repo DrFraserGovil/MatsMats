@@ -5,7 +5,7 @@
 MotifMatrix::MotifMatrix(std::string filepath,int id) : ID(id)
 {
 	//placeholder random initialisation
-	int L = 10 + rand()%2;
+	int L = 7 + rand()%5;
 	LogOdds = std::vector<std::vector<double>>(L,std::vector<double>(4,0.0));
 
 	for (int i = 0; i < L; ++i)
