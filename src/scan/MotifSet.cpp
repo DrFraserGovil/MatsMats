@@ -1,6 +1,7 @@
 #include "MotifSet.h"
 #include <iomanip>
 #include <cmath>
+#include <format>
 
 void SequenceScanner::LoadMotifs(int sequenceCount, int sequenceLength)
 {
