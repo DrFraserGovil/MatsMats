@@ -14,7 +14,7 @@ namespace Sequence
 		public:
 			DNA(std::string_view sequencestring);
 
-			const int Length;
+			int Length;
 			std::vector<unsigned char> Sequence; // array of 0/1/2/3 for A/C/T/G. Unsigned char is 1byte long, so nice and efficient
 
 			//bitfield manipulators
@@ -23,13 +23,14 @@ namespace Sequence
 			dnabits GetRCBitfield();
 			void StepBitfield();
 			
-
+			void NewSequence(std::string_view sequence);
 			static int MaximumEncodedLength();
 
 			// int SubstringHead;
 			// double Score;
 			// double RCScore;
 			std::string FileString;
+			std::string SequenceString;
 		private:
 
 			

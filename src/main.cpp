@@ -23,9 +23,8 @@ int main(int argc, char**argv)
 
 	SequenceScanner ms;
 	ms.LoadMotifs(Nseq,SeqLength);
-	ThreadRecords recs(ms.size());
 
-	
+	srand(1);
 	
 	std::vector<char> lib = {'a','c','g','t'};
 	std::string seq = std::string(SeqLength,' ');
@@ -38,28 +37,30 @@ int main(int argc, char**argv)
 	// LOG(DEBUG) << seq;
 	Sequence::DNA dna(seq);
 	
-	// ProgressBar PB(Nseq,"Sequence");
-	// for (int i = 0; i < Nseq ; ++ i)
-	// {
-		
-	// 	for (int q= 0; q < SeqLength; ++q)
-	// 	{
-	// 		dna.Sequence[q] = rand() % 4;
-	// 	}
-
-	// 	PB.Update(i);
-	// 	ms.Scan(dna,recs);
-	// }
-
+	Record best;
+	Record bestbest;
+	Sequence::DNA bestDNA(seq);
+	double bestScore = -99999;
 	Progress::For(0,Nseq,[&](int i)
 	{
 		for (int q= 0; q < SeqLength; ++q)
 		{
-			dna.Sequence[q] = rand() % 4;
+			int r=  rand() % 4;
+			dna.Sequence[q] = r;
+			dna.SequenceString[q] = lib[r]; 
+			// seq[q] = lib[rand() % 4];
 		}
-		ms.Scan(dna,recs);
-	});
-	
+		// dna.NewSequence(seq);
+		ms.Scan(dna,best);
+		if (best.Score > bestScore)
+		{
+			bestbest= best;
+			bestScore = best.Score;
+			bestDNA = dna;
+		}
+		
+	},"Scanning Sequences\n");
+
 
 	
 

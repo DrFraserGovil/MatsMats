@@ -50,23 +50,16 @@ struct PrecomputeElement
 	};
 };
 
-struct Record
-{
-	double Score;
-	int Position;
-	Direction Strand;
-	int Hits;
-};
-
-class ThreadRecords
+class Record
 {
 	public:
-		ThreadRecords(int nMotifs);
-		int BestID;
-		double BestScore;
-		std::vector<Record> Records;
-
+		double Score;
+		int Position;
+		Direction Strand;
+		int Hits;
+		int MotifID;
 		void CheckRecords(int motifID, double score, int pos, Direction dir, bool forceWin);
-		void NewScan();
-
+		std::string ToString();
 };
+
+

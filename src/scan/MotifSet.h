@@ -14,7 +14,7 @@ class SequenceScanner
 		
 		void LoadMotifs(int sequenceCount, int sequenceLength);
 
-		void Scan(Sequence::DNA & dna, ThreadRecords & records);
+		void Scan(Sequence::DNA & dna, Record & record);
 		size_t size() const;
 	private:
 		std::vector<std::vector<int>> Precomputers;

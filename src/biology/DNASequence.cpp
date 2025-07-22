@@ -5,25 +5,41 @@ namespace Sequence
 	//used for the bitfields to efficiently encode dna strings
 	
 
-	DNA::DNA(std::string_view sequencestring): Length(sequencestring.size())
+	DNA::DNA(std::string_view sequencestring) //: Length(sequencestring.size())
 	{
-		Sequence.reserve(sequencestring.length()); // Pre-allocate memory for efficiency
-		for (char c : sequencestring)
+		Sequence.resize(0);
+		NewSequence(sequencestring);
+		// Score = 0;
+		// RCScore = 0;
+	}
+
+
+	void DNA::NewSequence(std::string_view sequence)
+	{
+		Length = sequence.size();
+		SequenceString = std::string(sequence);
+		if (Sequence.size() < Length)
 		{
+			// SequenceString.resize(Length,' ');
+			Sequence.resize(Length,0);
+		}
+		int i = 0;
+		for (char c : sequence)
+		{
+			// SequenceString[i] = c;
 			switch (c) 
 			{
-				case 'A': case 'a': Sequence.push_back(0); break;
-				case 'C': case 'c': Sequence.push_back(1); break;
-				case 'G': case 'g': Sequence.push_back(2); break;
-				case 'T': case 't': Sequence.push_back(3); break;
+				case 'A': case 'a': Sequence[i] = 0; break;
+				case 'C': case 'c': Sequence[i] = 1; break;
+				case 'G': case 'g': Sequence[i] = 2; break;
+				case 'T': case 't': Sequence[i] = 3; break;
 				default:
-					LOG(ERROR) << "Character " << c << " in sequence " << sequencestring << " is not a part of the DNA library";
+					LOG(ERROR) << "Character " << c << " in sequence " << sequence << " is not a part of the DNA library";
 					throw std::runtime_error("Invalid DNA sequence");
 					break;
 			}
+			++i;
 		}
-		// Score = 0;
-		// RCScore = 0;
 	}
 
 	void DNA::SetBitfield(size_t motifSize, int startIdx )
