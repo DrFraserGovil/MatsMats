@@ -68,6 +68,5 @@ class ThreadRecords
 
 		void CheckRecords(int motifID, double score, int pos, Direction dir, bool forceWin);
 		void NewScan();
-	// private:
 
 };

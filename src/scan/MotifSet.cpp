@@ -64,12 +64,12 @@ size_t SequenceScanner::size() const
 
 void SequenceScanner::Precompute()
 {
-	LOG(INFO) << "Beginning precomputation";
 	int nPrecompute = NMotifs - Fliers.size();
 	int completed = 1;
 	double marksPerSeq = 16.0/nPrecompute;
 	PrecomputedScores.resize(Precomputers.size());
 	
+	ProgressBar PB(nPrecompute,"Precomputing Score Tables\n");
 	for (int i = 0; i < PrecomputedSizes.size(); ++i)
 	{
 		
@@ -102,6 +102,7 @@ void SequenceScanner::Precompute()
 				
 				
 			}
+			PB.Update(completed);
 			++completed;
 			// if (completed <= nPrecompute)
 			// {
@@ -111,7 +112,6 @@ void SequenceScanner::Precompute()
 	}
 }
 
-int id = 0;
 void SequenceScanner::Scan(Sequence::DNA & dna, ThreadRecords & records)
 {
 	//do the on the fly motifs first
@@ -142,14 +142,7 @@ void SequenceScanner::Scan(Sequence::DNA & dna, ThreadRecords & records)
 		for (int j = 0; j < scanSize; ++j)
 		{
 			dnabits pos = dna.GetBitfield();
-			// dnabits rpos = dna.GetRCBitfield();
-			// for (int k = 0; k < nMotifs; ++k)
-			// {
-			// 	// double fscore =;double rcscore =0;
-			// 	// auto & scores = local[pos][k];
-			// 	records.CheckRecords(Precomputers[i][k],local[pos][k],j,Direction::Forward,j==0);
-			// 	records.CheckRecords(Precomputers[i][k],local[rpos][k],j,Direction::Backward,false);
-			// }
+
 			auto best = PrecomputedScores[i][pos];
 			records.CheckRecords(best.MotifID,best.Score,j,best.Strand,j==0);
 
@@ -158,12 +151,6 @@ void SequenceScanner::Scan(Sequence::DNA & dna, ThreadRecords & records)
 				dna.StepBitfield();
 			}
 		}
-	}
-
-	++id;
-	if (id == 99)
-	{	
-		LOG(WARN) << "The best was " << records.BestID << " with a score of " << records.BestScore;
 	}
 }
 

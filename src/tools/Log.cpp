@@ -55,7 +55,7 @@ namespace  GlobalLog
 		std::string linebreak = "\n";
 		if (Config.ShowHeaders)
 		{
-			linebreak += "\t";
+			linebreak.append(std::string(8,' '));
 		}
 		auto message = split(Buffer.view(),"\n");
 		std::string buffer = "";

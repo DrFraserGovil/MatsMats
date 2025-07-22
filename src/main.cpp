@@ -37,29 +37,30 @@ int main(int argc, char**argv)
 	}
 	// LOG(DEBUG) << seq;
 	Sequence::DNA dna(seq);
-	int progSize = 16;
-	LOG(INFO) << "[" << std::string(progSize,' ') <<"]";
 	
-	int cTicks = 0;
-	double ticksPerSeq = progSize* 1.0/(Nseq-1);
-	for (int i = 0; i < Nseq ; ++ i)
-	{
+	// ProgressBar PB(Nseq,"Sequence");
+	// for (int i = 0; i < Nseq ; ++ i)
+	// {
 		
+	// 	for (int q= 0; q < SeqLength; ++q)
+	// 	{
+	// 		dna.Sequence[q] = rand() % 4;
+	// 	}
+
+	// 	PB.Update(i);
+	// 	ms.Scan(dna,recs);
+	// }
+
+	Progress::For(0,Nseq,[&](int i)
+	{
 		for (int q= 0; q < SeqLength; ++q)
 		{
 			dna.Sequence[q] = rand() % 4;
 		}
-
-		int nt = ticksPerSeq * i;
-		if (nt > cTicks)
-		{
-			cTicks = nt;
-			LOG(INFO).ErasePrevious();
-			LOG(INFO) << "[" << std::string(cTicks,'#') << " " << std::string(progSize - cTicks,' ') <<"]";
-		}
 		ms.Scan(dna,recs);
-	}
+	});
 	
+
 	
 
 
