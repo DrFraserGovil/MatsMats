@@ -1,19 +1,56 @@
 #include "MotifMatrix.h"
 #include <iomanip>
 #include <cmath>
-
+#include "../tools/fileparser.h"
 MotifMatrix::MotifMatrix(std::string filepath,int id) : ID(id)
 {
+	LOG(INFO) << "Loading " << filepath;
+	int L = -1;
+	int lineno = 1;
+	int expectedLineNo = 4;
+	forSplitLineIn(filepath,"\t",[&](auto line)
+	{
+		if (lineno > expectedLineNo)
+		{
+			LOG(ERROR) << "This PFM file has more than " << expectedLineNo << " lines, and is therefore not a proper DNA-PFM";
+			throw std::runtime_error("Improperly formated PFM");
+		}
+		if (L < 0)
+		{
+			L = line.size();
+			LogOdds = std::vector<std::vector<double>>(L,std::vector<double>(4,0.0));		
+		}
+		else
+		{
+			if (line.size() != L)
+			{
+				LOG(ERROR) << "PFM " << filepath << "has an irregular length";
+				throw std::runtime_error("Improperly formated PFM");
+			}
+		}
+		for (int i = 0; i < L; ++i)
+		{
+			LogOdds[i][lineno-1] = convert<double>(line[i]);
+		}
+		++lineno;
+		// LOG(INFO) << MakeString(line);
+
+	});
+	if (lineno -1 != expectedLineNo)
+	{
+		LOG(ERROR) << "This PFM file had only " << lineno -1 << " lines, and is therefore not a proper DNA-PFM";
+		throw std::runtime_error("Improperly formated PFM");
+	}
 	//placeholder random initialisation
-	int L = 10;//4 + rand() % 10;
-	LogOdds = std::vector<std::vector<double>>(L,std::vector<double>(4,0.0));
+	// int L = 10 + rand() % 8;
+	// LogOdds = std::vector<std::vector<double>>(L,std::vector<double>(4,0.0));
 
 	for (int i = 0; i < L; ++i)
 	{
 		double n = 0;
 		for (int j = 0; j < 4; ++j)
 		{
-			LogOdds[i][j] = -4*(rand()*1.0/RAND_MAX -1);
+			LogOdds[i][j] = std::log(LogOdds[i][j]);
 			n += std::exp(LogOdds[i][j]);
 		}
 		n = std::log(n);

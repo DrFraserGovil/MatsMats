@@ -4,6 +4,33 @@
 #include "../tools/formatter.h"
 // #include <format>
 
+
+
+
+
+SequenceScanner::SequenceScanner(std::vector<fs_path> motifPaths, int sequenceCount, int sequenceLength)
+{
+	std::vector<std::string> registry;
+	Motifs.resize(0);
+	int count = 0;
+	for (auto path : motifPaths)
+	{
+		std::string name = path.path().filename();
+		
+		if (std::find(registry.begin(),registry.end(),name) != registry.end())
+		{
+			LOG(WARN) << "A PFM file with the filename " << name << " has already been loaded in, so " << path.path() << " will be ignored";
+		}
+		else
+		{
+			registry.push_back(name);
+			Motifs.emplace_back(path.path(),count);
+			++count;
+		}
+
+	}
+}
+
 bool PrecomputationAllowed(size_t sequenceCount, size_t meanSize, size_t motifLength, int callingID)
 {
 
@@ -49,8 +76,7 @@ bool PrecomputationAllowed(size_t sequenceCount, size_t meanSize, size_t motifLe
 	return verdict;
 }
 
-
-void SequenceScanner::LoadMotifs(int sequenceCount, int sequenceLength)
+void SequenceScanner::InitialiseMotifs(int sequenceCount, int sequenceLength)
 {
 	Motifs.resize(0);
 	for (int i = 0; i < 200; ++i)

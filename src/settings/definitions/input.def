@@ -1,0 +1,4 @@
+SETTING(std::string, ReadRegex,".*\\.fastq\\..*","regex-reads","Regular expression used to detect files to be read in as 'read-files'.\nAll files  matching this regexp are read in.")
+SETTING(std::string, PFMRegex,".*\\.pfm","regex-pfm","Regular expression used to detect files to be read in as 'pfm files'.\nAll files  matching this regexp are read in.")
+SETTING(std::string, PFMDirectory,"../PFMs","dir-pfm","Directory to be searched (recursively) for files meeting the PFMRegex.")
+SETTING(std::string, ReadDirectory,"../FINAL_DATA","dir-reads","Directory to be searched (recursively) for files meeting the ReadRegex.")

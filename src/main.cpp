@@ -8,23 +8,26 @@
 #include "scan/MotifSet.h"
 #include "scan/Scanner.h"
 
+#include "filesystem"
 int main(int argc, char**argv)
 {
-	LOG(WARN) << "MATSMATS-ultra version";
-	srand(1);
-	// srand(time(NULL));
-	rand();rand(); //flush the seed
-
 	//interprets the command line arguments, and saves them into the settings object
 	Settings.Initialise(argc,argv);
 
+	auto fastqFiles = getRecursiveFileList(Settings.Input.ReadDirectory,Settings.Input.ReadRegex);
+	auto pwm = getRecursiveFileList(Settings.Input.PFMDirectory,Settings.Input.PFMRegex);
+	LOG(INFO) << fastqFiles.size() << " fastq files";
+	LOG(INFO) << pwm.size() << " pwm files";
+
+	
 	int Nseq = Settings.System.InputSize;
 	int SeqLength = 25;
+	auto scanner = SequenceScanner(pwm,Nseq,SeqLength);
 
-	SequenceScanner ms;
-	ms.LoadMotifs(Nseq,SeqLength);
+	// SequenceScanner ms;
+	// ms.LoadMotifs(Nseq,SeqLength);
 
-	srand(1);
+	// srand(1);
 	
 	std::vector<char> lib = {'a','c','g','t'};
 	std::string seq = std::string(SeqLength,' ');
@@ -51,7 +54,7 @@ int main(int argc, char**argv)
 			// seq[q] = lib[rand() % 4];
 		}
 		// dna.NewSequence(seq);
-		ms.Scan(dna,best);
+		scanner.Scan(dna,best);
 		if (best.Score > bestScore)
 		{
 			bestbest= best;

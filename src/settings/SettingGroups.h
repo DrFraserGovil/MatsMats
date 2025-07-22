@@ -9,6 +9,10 @@
 #define SETTINGS_FILE "definitions/output.def"
 #include "SettingsConstructor.h"
 
+#define SETTINGS_CATEGORY InputSettings
+#define SETTINGS_FILE "definitions/input.def"
+#include "SettingsConstructor.h"
+
 
 
 
@@ -18,6 +22,7 @@
 #define SETTINGS_GROUPS \
 	S_GROUP(SystemSettings, System) \
 	S_GROUP(OutputSettings, Output) \
+	S_GROUP(InputSettings, Input) \
 
 // SGroupDefinition.h
 #ifndef S_GROUP_DEFINITION_H

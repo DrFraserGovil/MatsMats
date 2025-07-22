@@ -4,3 +4,4 @@
 #include "fileparser.h"
 #include "MakeString.h"
 #include "progress.h"
+#include "recursiveFileSearch.h"
