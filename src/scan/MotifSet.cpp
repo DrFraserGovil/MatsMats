@@ -69,6 +69,7 @@ void SequenceScanner::Precompute()
 	int completed = 1;
 	double marksPerSeq = 16.0/nPrecompute;
 	PrecomputedScores.resize(Precomputers.size());
+	
 	for (int i = 0; i < PrecomputedSizes.size(); ++i)
 	{
 		
@@ -76,32 +77,30 @@ void SequenceScanner::Precompute()
 		int L = Motifs[Precomputers[i][0]].size();
 		dnabits nCodes = std::pow(4,L);
 		
-		PrecomputedScores[i] = std::vector<std::vector<scoreholder>>(nCodes,std::vector<scoreholder>(Precomputers[i].size(),0));
+		PrecomputedScores[i].resize(nCodes);
 
 		for (int j = 0; j < Precomputers[i].size(); ++j)
 		{
-			// LOG(INFO) << std::format("Precomputing [{:16}] Motif {} ({}/{})",std::string((int)(completed*marksPerSeq),'#'),Precomputers[i][j],completed,nPrecompute);
 
 			auto scores = Motifs[Precomputers[i][j]].ReferenceScores();//const reference to the internal log-odds of the relevant motif
 			
 			for (dnabits code = 0; code < nCodes; ++code)
 			{
 				double fscore = 0;
-				// double rcscore = 0;
+				double rcscore = 0;
 				dnabits decoder = code;
 				for (int i = 0; i < L; ++i)
 				{
 					int base = decoder & Sequence::BitHackExtractor;
-					// int rcbase = base ^ Sequence::BitHackExtractor;
+					int rcbase = base ^ Sequence::BitHackExtractor;
 					decoder = decoder >> Sequence::LogAlphabetSize;
 					fscore += scores[L-i-1][base];
-					// rcscore += scores[i][rcbase];
+					rcscore += scores[i][rcbase];
 				}
-				fscore *=100;
-				 PrecomputedScores[i][code][j] = fscore;
-				// PrecomputedScores[i][code][j].first = fscore;
-				// PrecomputedScores[i][code][j].second = rcscore;
-				//  = std::pair<double,double>(fscore,rcscore); //less efficient initialisation because it has to jump around, but hopefully more efficient extraction during runtime!
+
+				PrecomputedScores[i][code].CheckElement(fscore,rcscore,Precomputers[i][j]);
+				
+				
 			}
 			++completed;
 			// if (completed <= nPrecompute)
@@ -143,14 +142,16 @@ void SequenceScanner::Scan(Sequence::DNA & dna, ThreadRecords & records)
 		for (int j = 0; j < scanSize; ++j)
 		{
 			dnabits pos = dna.GetBitfield();
-			dnabits rpos = dna.GetRCBitfield();
-			for (int k = 0; k < nMotifs; ++k)
-			{
-				// double fscore =;double rcscore =0;
-				// auto & scores = local[pos][k];
-				records.CheckRecords(Precomputers[i][k],local[pos][k],j,Direction::Forward,j==0);
-				records.CheckRecords(Precomputers[i][k],local[rpos][k],j,Direction::Backward,false);
-			}
+			// dnabits rpos = dna.GetRCBitfield();
+			// for (int k = 0; k < nMotifs; ++k)
+			// {
+			// 	// double fscore =;double rcscore =0;
+			// 	// auto & scores = local[pos][k];
+			// 	records.CheckRecords(Precomputers[i][k],local[pos][k],j,Direction::Forward,j==0);
+			// 	records.CheckRecords(Precomputers[i][k],local[rpos][k],j,Direction::Backward,false);
+			// }
+			auto best = PrecomputedScores[i][pos];
+			records.CheckRecords(best.MotifID,best.Score,j,best.Strand,j==0);
 
 			if (j < scanSize - 1) // on all but the last step
 			{
@@ -162,7 +163,7 @@ void SequenceScanner::Scan(Sequence::DNA & dna, ThreadRecords & records)
 	++id;
 	if (id == 99)
 	{	
-		LOG(INFO) << "The best was " << records.BestID << " with a score of " << records.BestScore;
+		LOG(WARN) << "The best was " << records.BestID << " with a score of " << records.BestScore;
 	}
 }
 

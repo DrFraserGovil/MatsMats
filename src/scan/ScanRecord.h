@@ -5,7 +5,8 @@
 enum Direction
 {
 	Forward,
-	Backward
+	Backward,
+	Uninitialised,
 };
 
 std::string inline directionString(Direction dir)
@@ -23,6 +24,31 @@ std::string inline directionString(Direction dir)
 			break;
 	}
 }
+
+struct PrecomputeElement
+{
+	double Score;
+	Direction Strand;
+	int MotifID;
+
+	PrecomputeElement(){Strand = Uninitialised;};
+
+	void CheckElement(double fscore, double rcscore,int motif)
+	{
+		if (fscore > Score || Strand == Uninitialised)
+		{
+			Score = fscore;
+			Strand = Forward;
+			MotifID = motif;
+		}
+		if (rcscore > Score)
+		{
+			Score = rcscore;
+			Strand = Backward;
+			MotifID = motif;
+		}
+	};
+};
 
 struct Record
 {

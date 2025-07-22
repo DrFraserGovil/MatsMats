@@ -5,7 +5,7 @@
 MotifMatrix::MotifMatrix(std::string filepath,int id) : ID(id)
 {
 	//placeholder random initialisation
-	int L = 7 + rand()%5;
+	int L = 8 + rand()%3;
 	LogOdds = std::vector<std::vector<double>>(L,std::vector<double>(4,0.0));
 
 	for (int i = 0; i < L; ++i)
@@ -71,10 +71,6 @@ std::pair<double,double> MotifMatrix::Score(Sequence::DNA & sequence, int idx) c
 		forwardScore += LogOdds[i][base];
 		rcScore += LogOdds[L-i-1][rcMap[base]];
 	}
-	forwardScore *= 100;
-	rcScore *=100;
-	// sequence.Score = forwardScore;
-	// sequence.RCScore = rcScore;	
 	return {forwardScore,rcScore};
 }
 

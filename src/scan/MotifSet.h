@@ -3,7 +3,8 @@
 #include "ScanRecord.h"
 
 
-using scoreholder = double;
+using scoreholder = short int;
+
 
 class SequenceScanner
 {
@@ -23,10 +24,8 @@ class SequenceScanner
 		int NMotifs;
 
 		//first index groups motifs of the same length (small, < 5)
-		//second index is motifs in the group (~100)
-		//third index is the dnabits encoding 
-		//pair element is the forward and reverse complement of the dnabits
-		std::vector<std::vector<std::vector<scoreholder>>> PrecomputedScores;
+		//second index is the dnabits encoding 
+		std::vector<std::vector<PrecomputeElement>> PrecomputedScores;
 		void Precompute();
 };
 
