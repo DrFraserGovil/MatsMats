@@ -5,8 +5,7 @@
 #include "tools/tools.h"
 #include "parallel/parallel.h"
 #include "biology/DNASequence.h"
-#include "scan/MotifSet.h"
-#include "scan/Scanner.h"
+#include "scan/SequenceScanner.h"
 
 #include "filesystem"
 int main(int argc, char**argv)
