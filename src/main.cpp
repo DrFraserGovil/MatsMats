@@ -127,7 +127,7 @@ void scanSeq()
 	auto fastqFiles = getRecursiveFileList(Settings.Input.ReadDirectory,Settings.Input.ReadRegex);
 	
 	
-	fastqFiles.resize(5);
+	fastqFiles.resize(15);
 	
 	
 	ParallelPool Parallel(Settings.System.ParallelThreads);
