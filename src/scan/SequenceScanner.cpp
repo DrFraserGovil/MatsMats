@@ -131,7 +131,7 @@ void SequenceScanner::InitialiseMotifs(int sequenceCount, int sequenceLength)
 		{
 			LOG(DEBUG) << "    " << Precomputers[j].size() << " motifs of size " << PrecomputedSizes[j]; 
 		}
-		// Precompute();
+		Precompute();
 	}
 }
 
