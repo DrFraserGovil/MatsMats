@@ -1,1 +1,2 @@
 SETTING(bool, FullSummary,false,"full","If true, outputs the results of every motif per-string.")
+SETTING(std::string, OutputDirectory,"output","output","The name of the output directory into which all output will be placed")

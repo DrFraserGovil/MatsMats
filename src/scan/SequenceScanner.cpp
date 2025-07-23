@@ -230,6 +230,6 @@ void SequenceScanner::Scan(Sequence::DNA & dna, Record & best)
 		}
 	}
 	int L = Motifs[best.MotifID].size();
-	format_to_string(dna.FileString,"%s %d %d %d %s %d %f",dna.SequenceString,best.MotifID,best.Position,best.Position+L, directionString(best.Strand),best.Hits,best.Score);
+	format_to_string(dna.FileString,"%s %d %d %d %s %d %f",std::string(dna.SequenceString.begin()+best.Position,dna.SequenceString.begin()+best.Position+L), best.MotifID,best.Position,best.Position+L, directionString(best.Strand),best.Hits,best.Score);
 }
 

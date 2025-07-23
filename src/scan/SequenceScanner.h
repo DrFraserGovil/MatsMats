@@ -10,7 +10,7 @@ class SequenceScanner
 	public:
 		// std::vector<MotifMatrix> OnTheFly;
 		// std::vector<std::vector<MotifMatrix>> Precomputed;
-		SequenceScanner(std::vector<fs_path> motifPaths, int sequenceCount, int sequenceLength);
+		SequenceScanner(std::vector<fs_path> motifPaths, int sequenceCount=Settings.Input.EstimatedReadCount,int sequenceLength=Settings.Input.EstimatedReadLength);
 		
 		void Scan(Sequence::DNA & dna, Record & record);
 		size_t size() const;

@@ -30,7 +30,8 @@ namespace Sequence
 			// double Score;
 			// double RCScore;
 			std::string FileString;
-			std::string SequenceString;
+			std::string_view SequenceString;
+			bool AlphabetContained;
 		private:
 
 			

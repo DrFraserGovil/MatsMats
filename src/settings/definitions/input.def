@@ -2,3 +2,5 @@ SETTING(std::string, ReadRegex,".*\\.fastq\\..*","regex-reads","Regular expressi
 SETTING(std::string, PFMRegex,".*\\.pfm","regex-pfm","Regular expression used to detect files to be read in as 'pfm files'.\nAll files  matching this regexp are read in.")
 SETTING(std::string, PFMDirectory,"../PFMs","dir-pfm","Directory to be searched (recursively) for files meeting the PFMRegex.")
 SETTING(std::string, ReadDirectory,"../FINAL_DATA","dir-reads","Directory to be searched (recursively) for files meeting the ReadRegex.")
+SETTING(size_t,EstimatedReadCount,1000000,"estimate-count","An estimate of the number of input sequences to be added.nUsed to determine if precomputation is more efficient than on-the-fly")
+SETTING(size_t,EstimatedReadLength,50,"estimate-length","An estimate of the number of the length of the input sequences.\nUsed to determine if precomputation is more efficient than on-the-fly")

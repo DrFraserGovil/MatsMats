@@ -16,8 +16,9 @@ namespace Sequence
 
 	void DNA::NewSequence(std::string_view sequence)
 	{
+		
 		Length = sequence.size();
-		SequenceString = std::string(sequence);
+		SequenceString =  sequence; //std::string(sequence);
 		if (Sequence.size() < Length)
 		{
 			// SequenceString.resize(Length,' ');
@@ -34,12 +35,15 @@ namespace Sequence
 				case 'G': case 'g': Sequence[i] = 2; break;
 				case 'T': case 't': Sequence[i] = 3; break;
 				default:
-					LOG(ERROR) << "Character " << c << " in sequence " << sequence << " is not a part of the DNA library";
-					throw std::runtime_error("Invalid DNA sequence");
+					// LOG(ERROR) << "Character " << c << " in sequence " << sequence << " is not a part of the DNA library";
+					// throw std::runtime_error("Invalid DNA sequence");
+					AlphabetContained = false;
+					return;
 					break;
 			}
 			++i;
 		}
+		AlphabetContained = true;
 	}
 
 	void DNA::SetBitfield(size_t motifSize, int startIdx )

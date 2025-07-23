@@ -9,143 +9,69 @@
 
 #include "filesystem"
 #include "parallel/parallel.h"
+#include "scan/fastqReader.h"
 #include <mutex>
-// Helper functor to adapt `FILE*` to `std::istream`
-class PopenBuffer : public std::streambuf
+
+namespace fs = std::filesystem;
+
+std::string outputName(fs::directory_entry input, const fs::path inputRoot, const fs::path outputRoot)
 {
-	public:
-		PopenBuffer(FILE* file) : file_(file) {}
-	protected:
-		int underflow() override
-		{
-			if (gptr() == egptr())
-			{
-				size_t n = fread(buffer_, 1, sizeof(buffer_), file_);
-				if (n == 0) return traits_type::eof();
-				setg(buffer_, buffer_, buffer_ + n);
-			}
-			return traits_type::to_int_type(*gptr());
-		}
-	private:
-		FILE* file_;
-		char buffer_[1024];
-};
+	fs::path relative_path = input.path().lexically_relative(inputRoot);
+	fs::path outputFile = outputRoot / relative_path;
 
-
-Sequence::DNA ParseRawInput(std::istream& inputStream,SequenceScanner & scanner)
-{
-	// DataHolder data;
-	// StatefulReader Reader(data);
-
-	// int counter = 0;
-	std::string PIPE_LINE;
-	bool readNextLine = false;
-	Sequence::DNA seq("");
-	Record rec;
-	Sequence::DNA bestseq("");
-
-	double bestScore = -9999999;
-	while (std::getline(inputStream,PIPE_LINE))
+	while (outputFile.has_extension())
 	{
-		if (PIPE_LINE[0]=='@')
-		{
-			readNextLine = true;
-		}
-		else 
-		{
-			if (readNextLine)
-			{
-				try
-				{
-					seq.NewSequence(PIPE_LINE);
-					scanner.Scan(seq,rec);
-					if (bestScore < rec.Score)
-					{
-						bestScore = rec.Score;
-						bestseq = seq;
-						// LOG(INFO) << PIPE_LINE << " " << seq.FileString;
-					}
-				}
-				catch (...)
-				{
-					return bestseq;
-				}
-			}
-			readNextLine = false;
-		}
-		
-		// std::string chromosome;
-        // dnaindex idx;
-        // unsigned int k;
-
-        // parseLine(PIPE_LINE, Settings.StreamDelimiter, chromosome, idx, k);
-
-		// Reader.AddLine(chromosome,idx,k);
+		outputFile = outputFile.replace_extension("");;
 	}
-	// if (counter > maxPerFile)
-	// {
-	// 	maxPerFile = counter;
-	// }
-	// globalCounter += counter;
-	// LOG(INFO) << counter << " for a total " << globalCounter << " max = " << maxPerFile;
-	return bestseq;
-	
+	outputFile = outputFile.replace_extension(".out");
+
+	fs::create_directories(outputFile.parent_path());
+	return outputFile.string();
 }
 
-Sequence::DNA ShellExecute(std::string cmd,SequenceScanner & scanner)
-{
-	// std::string cmd = "cat Data/Aaron.dat";
-	LOG(DEBUG) << "Calling popen with command '" << cmd << "'";
-	FILE* pipe = popen(cmd.c_str(),"r");
-	if (!pipe)
-	{
-		throw std::runtime_error("Failed to open pipe for command: " + cmd);
-	}
-	PopenBuffer tmp(pipe);
-	std::istream stream(&tmp);
-	// auto out = ParseRawInput(stream);
-	auto out = ParseRawInput(stream,scanner);
-	auto exit = pclose(pipe);
-	if (WEXITSTATUS(exit) != 0)
-	{
-		throw std::runtime_error("Command (" + cmd +") returned a non-zero exit code");
-	}
-	return out;
-}
 
 void scanSeq()
 {
 
 	
 	auto pwm = getRecursiveFileList(Settings.Input.PFMDirectory,Settings.Input.PFMRegex);
-	// pwm.resize(3);
-	int Nseq = Settings.System.InputSize;
-	int SeqLength = 25;
-	auto scanner = SequenceScanner(pwm,Nseq,SeqLength);
+	auto scanner = SequenceScanner(pwm);
 
-
-	auto fastqFiles = getRecursiveFileList(Settings.Input.ReadDirectory,Settings.Input.ReadRegex);
-	
-	
-	fastqFiles.resize(15);
+	const fs::path inputRoot(Settings.Input.ReadDirectory.Value());
+	const fs::path outputRoot(Settings.Output.OutputDirectory.Value());
+	auto fastqFiles = getRecursiveFileList(inputRoot,Settings.Input.ReadRegex);
+	// fastqFiles.resize(15);
 	
 	
 	ParallelPool Parallel(Settings.System.ParallelThreads);
 
 	std::atomic<int> globalCount;
 	std::mutex lock;
-	ProgressBar PB(fastqFiles.size(),"Iterating through files\n");
-	Parallel.For(fastqFiles.size(),[&fastqFiles,&scanner,&globalCount,&lock,&PB](int i)
+
+	
+	ProgressBar PB(fastqFiles.size(),"Iterating through " +std::to_string(fastqFiles.size()) + " files\n");
+	Parallel.For(fastqFiles.size(),[&](int i)
 	{
-		// int count = 0;
-		auto s = ShellExecute("gzcat " + fastqFiles[i].path().string(),scanner);
-		// LOG(INFO) << fastqFiles[i].path().filename() << " best score = " << s.FileString;
 		++globalCount;
 		lock.lock();
 		PB.Update(globalCount);
 		lock.unlock();
-		// globalCount += s;
-		// LOG(INFO) << i << " " << fastqFiles[i].path();
+
+		auto extension = fastqFiles[i].path().extension().string();
+
+		auto outname =  outputName(fastqFiles[i],inputRoot,outputRoot);
+
+		std::ofstream outstream(outname);
+		if (extension == ".gz")
+		{
+			gzfastQScan(fastqFiles[i].path().string(),scanner,outstream);
+		}
+		else
+		{
+			fastqScan(fastqFiles[i].path().string(),scanner,outstream);
+		}
+		outstream.close();
+
 	});
 	LOG(INFO) << "Scan complete, exiting scope";
 }
@@ -167,7 +93,6 @@ int main(int argc, char**argv)
 	// SuffixTree tree(scanner.Motifs,scanner.Precomputers[2]);
 
 	scanSeq();
-	LOG(INFO) << "here!";
 	//Load PWMs from memory
 
 	//Load sequences from memory & pre-analyse are we assuming from file and not piped in? Pipes may be more efficient than saving to disk if preprocessing
